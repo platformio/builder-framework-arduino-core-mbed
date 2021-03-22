@@ -29,7 +29,7 @@ env = DefaultEnvironment()
 platform = env.PioPlatform()
 board = env.BoardConfig()
 
-FRAMEWORK_DIR = platform.get_package_dir("framework-arduino-mbedos")
+FRAMEWORK_DIR = platform.get_package_dir("framework-arduino-mbed")
 assert os.path.isdir(FRAMEWORK_DIR)
 
 
