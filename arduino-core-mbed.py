@@ -75,7 +75,7 @@ env.Append(
 )
 
 if board.get("build.mcu", "").startswith("nrf52"):
-    env.Append(["cc_310_core", "cc_310_ext", "cc_310_trng"])
+    env.Append(LIBS=["cc_310_core", "cc_310_ext", "cc_310_trng"])
 
 env.Append(
     ASFLAGS=env.get("CCFLAGS", [])[:],
