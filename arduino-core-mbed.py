@@ -111,7 +111,7 @@ env.Prepend(_LIBFLAGS="-Wl,--whole-archive ")
 env.Append(_LIBFLAGS=" -Wl,--no-whole-archive -lstdc++ -lsupc++ -lm -lc -lgcc -lnosys")
 
 if not board.get("build.ldscript", ""):
-    env.Replace(LDSCRIPT_PATH=board.get("build.arduino.ldscript", ""))
+    env.Replace(LDSCRIPT_PATH=board.get("build.arduino.ldscript", "linker_script.ld"))
 
 libs = []
 
