@@ -96,7 +96,9 @@ env.Append(
     CPPPATH=[
         os.path.join(FRAMEWORK_DIR, "cores", board.get("build.core")),
         os.path.join(FRAMEWORK_DIR, "cores", board.get(
-            "build.core"), "api", "deprecated")
+            "build.core"), "api", "deprecated"),
+        os.path.join(FRAMEWORK_DIR, "cores", board.get(
+            "build.core"), "api", "deprecated-avr-comp")        
     ],
 
     LINKFLAGS=[
