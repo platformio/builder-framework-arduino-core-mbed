@@ -71,7 +71,7 @@ def configure_flash_layout(board_config):
 
     env.Append(
         LINKFLAGS=defines,
-        CPPDEFINES=defines
+        CPPDEFINES=[d[2:] for d in defines] 
     )
 
 
