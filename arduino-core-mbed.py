@@ -56,22 +56,24 @@ def configure_flash_layout(board_config):
     flash_layout = board_config.get("build.arduino.flash_layout", "50_50")
     defines = []
     if flash_layout == "50_50":
-        defines.append("-DCM4_BINARY_START=0x08100000")
+        defines.append(("CM4_BINARY_START", "0x08100000"))
         if board_id == "portenta_h7_m4":
-            defines.append("-DCM4_BINARY_END=0x08200000")
+            defines.append(("CM4_BINARY_END", "0x08200000"))
     elif flash_layout == "75_25":
-        defines.append("-DCM4_BINARY_START=0x08180000")
+        defines.append(("CM4_BINARY_START", "0x08180000"))
         if board_id == "portenta_h7_m4":
             board_config.update("upload.offset_address", "0x08180000")
-            defines.append("-DCM4_BINARY_END=0x08200000")
+            defines.append(("CM4_BINARY_END", "0x08200000"))
     elif flash_layout == "100_0":
-        defines.append("-DCM4_BINARY_START=0x60000000")
+        defines.append(("CM4_BINARY_START", "0x60000000"))
         if board_id == "portenta_h7_m4":
-            defines.extend(["-DCM4_BINARY_END=0x60040000", "-DCM4_RAM_END=0x60080000"])
+            defines.extend(
+                [("CM4_BINARY_END", "0x60040000"), ("CM4_RAM_END", "0x60080000")]
+            )
 
     env.Append(
-        LINKFLAGS=defines,
-        CPPDEFINES=defines
+        LINKFLAGS=["-D%s=%s" % (name, value) for name, value in defines],
+        CPPDEFINES=defines,
     )
 
 
