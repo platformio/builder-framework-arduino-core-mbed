@@ -80,7 +80,8 @@ cxxflags = set(load_flags("cxxflags"))
 ccflags = cflags.intersection(cxxflags)
 
 env.Append(
-    ASFLAGS=["-x", "assembler-with-cpp"],
+    ASFLAGS=[f for f in ccflags if isinstance(f, str) and f.startswith("-m")],
+    ASPPFLAGS=["-x", "assembler-with-cpp"],
 
     CFLAGS=sorted(list(cflags - ccflags)),
 
@@ -106,8 +107,6 @@ if board.get("build.mcu", "").startswith("nrf52840"):
     env.Append(LIBS=["cc_310_core", "cc_310_ext", "cc_310_trng"])
 
 env.Append(
-    ASFLAGS=env.get("CCFLAGS", [])[:],
-
     # Due to long path names "-iprefix" hook is required to avoid toolchain crashes
     CCFLAGS=[
         "-iprefix" + os.path.join(FRAMEWORK_DIR, "cores", board.get("build.core")),
