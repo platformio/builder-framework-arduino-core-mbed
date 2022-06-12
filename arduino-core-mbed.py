@@ -108,12 +108,25 @@ env.Append(
 if board.get("build.mcu", "").startswith("nrf52840"):
     env.Append(LIBS=["cc_310_core", "cc_310_ext", "cc_310_trng"])
 
+
+# read includes from this file to add them into CPPPATH later
+includes_file = os.path.join(FRAMEWORK_DIR, "variants", board.get("build.variant"), "includes.txt")
+file_lines = []
+includes = []
+with open(includes_file, "r") as fp:
+    file_lines = fp.readlines()
+for l in file_lines:
+    path = l.strip().replace("-iwithprefixbefore/", "").replace("/", os.sep)
+    # emulate -iprefix <framework path>.
+    path = os.path.join(FRAMEWORK_DIR, "cores", board.get("build.core"), path)
+    includes.append(path)
+
 env.Append(
     # Due to long path names "-iprefix" hook is required to avoid toolchain crashes
     CCFLAGS=[
-        "-iprefix" + os.path.join(FRAMEWORK_DIR, "cores", board.get("build.core")),
-        "@%s" % os.path.join(FRAMEWORK_DIR, "variants", board.get(
-            "build.variant"), "includes.txt"),
+        #"-iprefix" + os.path.join(FRAMEWORK_DIR, "cores", board.get("build.core")),
+        #"@%s" % os.path.join(FRAMEWORK_DIR, "variants", board.get(
+        #    "build.variant"), "includes.txt"),
         "-nostdlib"
     ],
 
@@ -136,6 +149,21 @@ env.Append(
         "-Wl,--as-needed"
     ]
 )
+
+
+def is_pio_build():
+	from SCons.Script import COMMAND_LINE_TARGETS
+	return "idedata" not in COMMAND_LINE_TARGETS and "_idedata" not in COMMAND_LINE_TARGETS
+
+# expand with read includes for IDE, but use -iprefix command for actual building..
+if not is_pio_build():
+    env.Append(CPPPATH=includes)
+else:
+    env.Append(CCFLAGS=[
+        "-iprefix" + os.path.join(FRAMEWORK_DIR, "cores", board.get("build.core")),
+        "@%s" % os.path.join(FRAMEWORK_DIR, "variants", board.get(
+            "build.variant"), "includes.txt"),
+    ])
 
 #
 # Configure dynamic memory layout
