@@ -29,7 +29,9 @@ env = DefaultEnvironment()
 platform = env.PioPlatform()
 board = env.BoardConfig()
 
-FRAMEWORK_DIR = platform.get_package_dir("framework-arduino-mbed")
+is_xiao_board = board.id in ("xiaoblesense", "xiaoble")
+framework_pkg = "framework-arduino-mbed-seeed" if is_xiao_board else "framework-arduino-mbed" 
+FRAMEWORK_DIR = platform.get_package_dir(framework_pkg)
 assert os.path.isdir(FRAMEWORK_DIR)
 
 
