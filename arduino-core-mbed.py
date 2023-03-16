@@ -50,7 +50,7 @@ def load_flags(filename):
 def configure_flash_layout(board_config):
     # Currently only Portenta board needs this functionality
     board_id = env.subst("$BOARD")
-    if not board_id.startswith("portenta_h7"):
+    if not board_id.startswith(("portenta_h7", "nicla")):
         return
 
     flash_layout = board_config.get("build.arduino.flash_layout", "50_50")
