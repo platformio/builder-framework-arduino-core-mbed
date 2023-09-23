@@ -50,20 +50,20 @@ def load_flags(filename):
 
 
 def configure_flash_layout(board_config):
-    # Currently only Portenta board needs this functionality
+    # Currently only Portenta, Opta, Nicla Vision boards need this functionality
     board_id = env.subst("$BOARD")
-    if not board_id.startswith("portenta_h7"):
+    if not board_id.startswith(("portenta_h7", "opta", "nicla_vision")):
         return
 
     flash_layout = board_config.get("build.arduino.flash_layout", "50_50")
     defines = []
     if flash_layout == "50_50":
         defines.append(("CM4_BINARY_START", "0x08100000"))
-        if board_id == "portenta_h7_m4":
+        if board_id in ("portenta_h7_m4", "opta_m4", "nicla_vision_m4"):
             defines.append(("CM4_BINARY_END", "0x08200000"))
     elif flash_layout == "75_25":
         defines.append(("CM4_BINARY_START", "0x08180000"))
-        if board_id == "portenta_h7_m4":
+        if board_id in ("portenta_h7_m4", "opta_m4", "nicla_vision_m4"):
             board_config.update("upload.offset_address", "0x08180000")
             defines.append(("CM4_BINARY_END", "0x08200000"))
     elif flash_layout == "100_0":
@@ -76,6 +76,30 @@ def configure_flash_layout(board_config):
     env.Append(
         LINKFLAGS=["-D%s=%s" % (name, value) for name, value in defines],
         CPPDEFINES=defines,
+    )
+
+
+def configure_fpu_flags(board_config):
+    board_cpu = board_config.get("build.cpu", "")
+    if board_cpu not in ("cortex-m4", "cortex-m7"):
+        return
+
+    fpv_version = "4-sp" if board_cpu == "cortex-m4" else "5"
+    env.Append(
+        ASFLAGS=[
+            "-mfloat-abi=soft",
+            "-mfpu=fpv%s-d16" % fpv_version
+        ],
+
+        CCFLAGS=[
+            "-mfloat-abi=soft",
+            "-mfpu=fpv%s-d16" % fpv_version
+        ],
+
+        LINKFLAGS=[
+            "-mfloat-abi=soft",
+            "-mfpu=fpv%s-d16" % fpv_version
+        ]
     )
 
 
@@ -144,6 +168,12 @@ env.Append(
 #
 
 configure_flash_layout(board)
+
+#
+# Configure FPU flags
+#
+
+configure_fpu_flags(board)
 
 #
 # Linker requires preprocessing with specific defines
