@@ -134,6 +134,12 @@ if board.get("build.mcu", "").startswith("nrf52840"):
 
 env.Append(
     # Due to long path names "-iprefix" hook is required to avoid toolchain crashes
+    ASFLAGS=[
+        "-iprefix" + os.path.join(FRAMEWORK_DIR, "cores", board.get("build.core")),
+        "@%s" % os.path.join(FRAMEWORK_DIR, "variants", board.get(
+            "build.variant"), "includes.txt")
+    ],
+
     CCFLAGS=[
         "-iprefix" + os.path.join(FRAMEWORK_DIR, "cores", board.get("build.core")),
         "@%s" % os.path.join(FRAMEWORK_DIR, "variants", board.get(
