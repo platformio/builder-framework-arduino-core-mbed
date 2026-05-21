@@ -32,13 +32,16 @@ board = env.BoardConfig()
 FRAMEWORK_DIR = platform.get_package_dir("framework-arduino-mbed")
 assert os.path.isdir(FRAMEWORK_DIR)
 
+# Resolve the variant directory, honouring build.variants_dir if set
+_variants_dir = board.get("build.variants_dir", "") or os.path.join(FRAMEWORK_DIR, "variants")
+variant_dir = os.path.join(_variants_dir, board.get("build.variant", ""))
+
 
 def load_flags(filename):
     if not filename:
         return []
 
-    file_path = os.path.join(FRAMEWORK_DIR, "variants", board.get(
-        "build.variant"), "%s.txt" % filename)
+    file_path = os.path.join(variant_dir, "%s.txt" % filename)
     if not os.path.isfile(file_path):
         print("Warning: Couldn't find file '%s'" % file_path)
         return []
@@ -118,8 +121,8 @@ env.Append(
     CXXFLAGS=sorted(list(cxxflags - ccflags)),
 
     LIBPATH=[
-        os.path.join(FRAMEWORK_DIR, "variants", board.get("build.variant")),
-        os.path.join(FRAMEWORK_DIR, "variants", board.get("build.variant"), "libs")
+        variant_dir,
+        os.path.join(variant_dir, "libs")
     ],
 
     LINKFLAGS=load_flags("ldflags"),
@@ -136,14 +139,12 @@ env.Append(
     # Due to long path names "-iprefix" hook is required to avoid toolchain crashes
     ASFLAGS=[
         "-iprefix" + os.path.join(FRAMEWORK_DIR, "cores", board.get("build.core")),
-        "@%s" % os.path.join(FRAMEWORK_DIR, "variants", board.get(
-            "build.variant"), "includes.txt")
+        "@%s" % os.path.join(variant_dir, "includes.txt")
     ],
 
     CCFLAGS=[
         "-iprefix" + os.path.join(FRAMEWORK_DIR, "cores", board.get("build.core")),
-        "@%s" % os.path.join(FRAMEWORK_DIR, "variants", board.get(
-            "build.variant"), "includes.txt"),
+        "@%s" % os.path.join(variant_dir, "includes.txt"),
         "-nostdlib"
     ],
 
@@ -184,8 +185,7 @@ configure_fpu_flags(board)
 #
 
 if not board.get("build.ldscript", ""):
-    ldscript = os.path.join(
-        FRAMEWORK_DIR, "variants", board.get("build.variant"), "linker_script.ld")
+    ldscript = os.path.join(variant_dir, "linker_script.ld")
     if board.get("build.mbed.ldscript", ""):
         ldscript = env.subst(board.get("build.arduino.ldscript"))
     if os.path.isfile(ldscript):
@@ -214,13 +214,13 @@ libs = []
 
 if "build.variant" in board:
     env.Append(CPPPATH=[
-        os.path.join(FRAMEWORK_DIR, "variants", board.get("build.variant"))
+        variant_dir
     ])
 
     libs.append(
         env.BuildLibrary(
             os.path.join("$BUILD_DIR", "FrameworkArduinoVariant"),
-            os.path.join(FRAMEWORK_DIR, "variants", board.get("build.variant"))))
+            variant_dir))
 
 libs.append(
     env.BuildLibrary(
