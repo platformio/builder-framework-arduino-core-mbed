@@ -33,8 +33,13 @@ FRAMEWORK_DIR = platform.get_package_dir("framework-arduino-mbed")
 assert os.path.isdir(FRAMEWORK_DIR)
 
 # Resolve the variant directory, honouring build.variants_dir if set
-_variants_dir = board.get("build.variants_dir", "") or os.path.join(FRAMEWORK_DIR, "variants")
-variant_dir = os.path.join(_variants_dir, board.get("build.variant", ""))
+variants_dir = (
+    os.path.join(env.subst("$PROJECT_DIR"), board.get("build.variants_dir"))
+    if board.get("build.variants_dir", "")
+    else os.path.join(FRAMEWORK_DIR, "variants")
+)
+
+variant_dir = os.path.join(variants_dir, board.get("build.variant", ""))
 
 
 def load_flags(filename):
